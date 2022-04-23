@@ -14,12 +14,25 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-client.connect((err) => {
-  const collection = client.db("test").collection("devices");
-  console.log("DB connected");
-  // perform actions on the collection object
-  client.close();
-});
+//mongoDB data async function
+async function run() {
+  try {
+    //connection database
+    await client.connect();
+    const serviceCollection = client
+      .db("geniusCarService")
+      .collection("service");
+    // get all service data
+    app.get("/service", async (req, res) => {
+      const query = {};
+      const cursor = serviceCollection.find(query);
+      const services = await cursor.toArray();
+      res.send(services);
+    });
+  } finally {
+  }
+}
+run().catch(console.dir);
 
 // data  get
 app.get("/", (req, res) => {
