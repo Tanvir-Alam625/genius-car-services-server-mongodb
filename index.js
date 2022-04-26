@@ -50,6 +50,27 @@ async function run() {
       const result = await serviceCollection.deleteOne(query);
       res.send(result);
     });
+    //update
+    app.put("/service/:id", async (req, res) => {
+      const id = req.params.id;
+      const updateService = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          name: updateService.name,
+          description: updateService.description,
+          price: updateService.price,
+          img: updateService.img,
+        },
+      };
+      const result = await serviceCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
   } finally {
   }
 }
