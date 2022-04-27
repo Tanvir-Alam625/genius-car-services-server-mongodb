@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { query } = require("express");
+const { response } = require("express");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -20,9 +21,12 @@ async function run() {
   try {
     //connection database
     await client.connect();
+    //service collection
     const serviceCollection = client
       .db("geniusCarService")
       .collection("service");
+    //order collection
+    const orderCollection = client.db("geniusCarService").collection("order");
     // get all service data
     app.get("/service", async (req, res) => {
       const query = {};
@@ -69,6 +73,12 @@ async function run() {
         updateDoc,
         options
       );
+      res.send(result);
+    });
+    // order collection api data
+    app.post("/order", async (req, res) => {
+      const order = req.body;
+      const result = await orderCollection.insertOne(order);
       res.send(result);
     });
   } finally {
