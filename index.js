@@ -17,6 +17,25 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+function verifyToken(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth) {
+    return res.status(401).send({ message: "UnAuthorization access" });
+  }
+  const token = auth.split(" ")[1];
+  console.log("this valid token ", token);
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ message: "forbidden access" });
+    }
+    console.log("decoded", decoded);
+    req.decoded = decoded;
+    next();
+  });
+  // console.log(auth);
+}
+
 //mongoDB data async function
 async function run() {
   try {
@@ -83,12 +102,17 @@ async function run() {
       res.send(result);
     });
     // show order in client side API
-    app.get("/orders", async (req, res) => {
+    app.get("/orders", verifyToken, async (req, res) => {
+      const decodedEmail = req.decoded.email;
       const email = req.query.email;
-      const query = { email: email };
-      const cursor = orderCollection.find(query);
-      const orders = await cursor.toArray();
-      res.send(orders);
+      if (decodedEmail === email) {
+        const query = { email: email };
+        const cursor = orderCollection.find(query);
+        const orders = await cursor.toArray();
+        res.send(orders);
+      } else {
+        return res.status(403).send({ message: "forbidden access" });
+      }
     });
     // jwt token
     app.post("/getToken", async (req, res) => {
@@ -96,7 +120,7 @@ async function run() {
       const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1d",
       });
-      res.send(accessToken);
+      res.send({ accessToken });
     });
   } finally {
   }
