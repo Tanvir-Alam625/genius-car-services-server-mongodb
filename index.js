@@ -24,7 +24,6 @@ function verifyToken(req, res, next) {
     return res.status(401).send({ message: "UnAuthorization access" });
   }
   const token = auth.split(" ")[1];
-  console.log("this valid token ", token);
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).send({ message: "forbidden access" });
