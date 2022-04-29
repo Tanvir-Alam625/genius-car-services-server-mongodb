@@ -47,6 +47,9 @@ async function run() {
     //order collection
     const orderCollection = client.db("geniusCarService").collection("order");
     // get all service data
+    app.get("/", (req, res) => {
+      res.send("server is running ");
+    });
     app.get("/service", async (req, res) => {
       const query = {};
       const cursor = serviceCollection.find(query);
